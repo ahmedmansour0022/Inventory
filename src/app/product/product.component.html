@@ -1,0 +1,420 @@
+<nav class="navbar navbar-expand-lg  bg-light">
+    <a class="navbar-brand" routerLink="/Report">
+      <i class="fa fa-home" style="color: yellow; font-size:40px;"></i>
+      Inventory<span class="mange">Mangement</span></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" style="color: gray;"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a routerLink="/Report" routerLinkActive="active"  class="nav-link" href="#">
+            <i class="fa fa-paste"></i>
+            Inventory Report <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/Inventory" routerLinkActive="active" class="nav-link" href="#" ><i class="fa fa-cubes" style="margin-right: 10px;"></i>Inventory</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/Sales">
+            <i class="fa fa-shopping-cart"  style="margin-right: 10px;"></i>Sales</a>
+        </li>
+      </ul>
+        <button class="btn btn-danger my-2 my-sm-0" type="submit" (click)="logout()">Log out</button>
+    </div>
+  </nav>
+  <br>
+  
+<div class="row ">
+    <div class="col-md-1 ">
+        <div class="box">
+            <a  (click)="openModal()" style="margin-top: 7px;" mat-fab color="primary" aria-label="Example icon button with a bookmark icon">
+                <i class="fa fa-plus" style="color:white; font-size: 30px;"></i>
+            </a>    
+        </div>
+    </div>
+    <div class="col-md-1">
+        <div class="box">
+            <a  (click)="openModal2()" style="margin-top: 7px; background-color: black;" mat-fab color="warn" aria-label="Example icon button with a bookmark icon">
+                <i class="fa fa-truck" style="color:white; font-size: 30px;position: relative;"></i>
+                <p class="zoz" style="position: absolute ;transform: translateY(-42px);">{{counter}}</p>
+            </a>    
+        </div>
+    </div>
+    <div class="col-md-10 text-center">
+        <h1 *ngIf="!error" style="font-family: cursive; color: gray;">you can make an order now...
+        </h1>
+        <h1 *ngIf="error" style="font-family: cursive; color: darkred;">the order can not contains more than 21 products
+        </h1>
+    </div>
+
+</div>
+<br>
+<p-table #dt [value]="products2" [scrollable]="true"scrollHeight="480px"
+ [resizableColumns]="true" 
+ styleClass="p-datatable-sm" [columns]="selectedColumns" 
+ selectionMode="multiple" 
+ sortMode="multiple" [(selection)]="selectedProducts"
+ dataKey="bulletId" [rows]="10"[showCurrentPageReport]="true"[rowsPerPageOptions]="[10,25,50]"[loading]="loading"
+ [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+ [globalFilterFields]="['bulletId','brand','class','harvestId','package','product','quantity','size','vairte']" >
+<ng-template pTemplate="caption">
+        <div class="export" style="margin-right: 5px; float:right">
+            <span class="p-input-icon-left p-ml-auto">
+                <input class="form-control" pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Search keyword" />
+            </span>
+        </div>
+        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+            selectedItemsLabel="{0} columns selected" [style]="{minWidth: '200px'}" placeholder="Choose Columns">
+        </p-multiSelect>
+    </ng-template>
+    <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+            <col style="width:50px">
+            <col style="width:300px">
+            <col *ngFor="let col of columns" style="width:300px">
+            <col style="width:75px">
+            <col style="width:75px">
+        </colgroup>
+    </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pResizableColumn></th>
+                <th pSortableColumn="bulletId" pResizableColumn>bulletId<p-sortIcon field="bulletId"></p-sortIcon></th>
+                <th pResizableColumn *ngFor="let col of columns" [pSortableColumn]=col.field>
+                    {{col.header}}
+                    <p-sortIcon [field]=col.field></p-sortIcon>
+                </th>
+                <th pResizableColumn>Update</th>
+                <th pResizableColumn>Delete</th>  
+            </tr>
+            <tr>
+                <th style="width: 3rem">
+                    <p-tableHeaderCheckbox (click)="counterfun()"></p-tableHeaderCheckbox>
+                </th>
+
+                <th>
+                    <p-columnFilter type="text" field="bulletId"></p-columnFilter>
+                </th>
+                <th  *ngFor="let col of columns">
+                    <p-columnFilter type="text" [field]="col.field"></p-columnFilter>
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product let-columns="columns">
+            <tr>
+                <td>
+                    <p-tableCheckbox  (click)="counterfun()" [value]="product"></p-tableCheckbox >
+                </td>
+                <td>{{product.bulletId}}</td>
+                <td *ngFor="let col of columns">
+                    {{product[col.field]}}
+                </td>
+                <td><button class="btn btn-warning" (click)="openModal4(product)"><i class="fa fa-pencil"></i></button></td>
+                <td><button class="btn btn-danger" (click)="openModal3(product.bulletId)"><i class="fa fa-trash"></i></button></td>
+                </tr>
+        </ng-template>
+    </p-table>
+    <!--Modal Add Produc ///////////////////////////////////////////////////////////////////-->
+    <div class="modal " tabindex="-1" role="dialog"  [ngStyle]="{'display':display}">
+        <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                    <div class="modal-header" style="background-color: black; color: white;">
+                          <h2 class="modal-title lead" style="font-family: cursive; color: gray;">Add Product</h2>
+                          <a style="cursor: pointer;" class="close" aria-label="Close" (click)="onCloseHandled()"><span aria-hidden="true">&times;</span></a>
+                        </div>
+               <div class="modal-body" style="height: 380px;;overflow-y: scroll;">
+                               <!--Login Form-->
+                               <p>{{model.value}}</p>
+                               <form (ngSubmit)="onSubmit()" #heroForm="ngForm">
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="Product" class="col-form-label">Product</label>
+                                        <select class="form-control" id="Product "
+                                        required
+                                        [(ngModel)]="model.Product " name="Product ">
+                                        <option  [ngValue]="undefined" selected>---Select Product---</option>
+                                        <option *ngFor="let p of product" [value]="p.productName">{{p.productName}}</option>
+                                       </select>           
+                                    </div>
+                                </div>  
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="Package" class="col-form-label">Package</label>
+                                        <select class="form-control"  id="Package  "
+                                        required
+                                        [(ngModel)]="model.Package" name="Package  ">
+                                        <option  [ngValue]="undefined" selected>---Select Package---</option>
+                                        <option *ngFor="let p of Package" [value]="p.packageName">{{p.packageName}}</option>
+                                       </select>           
+                                    </div>
+                                </div>  
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="Brand" class="col-form-label">Brand </label>
+                                        <select class="form-control"  id="Brand"
+                                        required
+                                        [(ngModel)]="model.Brand" name="Brand">
+                                        <option  [ngValue]="undefined" selected>---Select Brand---</option>
+                                        <option *ngFor="let b of Brand" [value]="b.brandName">{{b.brandName}}</option>
+                                       </select>           
+                                    </div>
+                                </div>   
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="Vairte" class="col-form-label">Vairte</label>
+                                        <select class="form-control"  id="Vairte"
+                                        required
+                                        [(ngModel)]="model.Vairte" name="Vairte">
+                                        <option  [ngValue]="undefined" selected>---Select Vairte---</option>
+                                        <option *ngFor="let v of Vairte" [value]="v.vairteName">{{v.vairteName}}</option>
+                                       </select>           
+                                    </div>
+                                </div>  
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="HarvestId " class="col-form-label">Harvest</label>
+                                        <select class="form-control"  id="Vairte"
+                                        required
+                                        [(ngModel)]="model.HarvestId" name="HarvestId">
+                                        <option  [ngValue]="undefined" selected>---Select Harvest---</option>
+                                        <option *ngFor="let h of Harvest" [value]="h.harvestId">{{h.product}}</option>
+                                       </select>           
+                                    </div>
+                                </div>                                                                                                                                                                                                                                                                                
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <label for="Class" class="col-form-label">Class</label>
+                                        <input type="text" class="form-control" id="Class"
+                                        required
+                                        [(ngModel)]="model.Class" name="Class ">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="Size" class="col-form-label">Size</label>
+                                        <input type="text" class="form-control" id="Size"
+                                        required
+                                        [(ngModel)]="model.Size" name="Size">       
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="Quantity" class="col-form-label">Quantity</label>
+                                        <input type="text" class="form-control" id="Quantity"
+                                        required
+                                        [(ngModel)]="model.Quantity" name="Quantity">
+                                    </div>
+                                  </div>
+                                  <div class="form-group row">  
+                                      <div class="col-md-4">
+                                        {{imageError}}
+                                            <label for="file-upload" class="custom-file-upload">
+                                                Custom Upload
+                                            </label>
+                                            <input id="file-upload" (change)="fileChangeEvent($event)" type="file"/>
+                                            
+                                      </div> 
+                                      <div class="col-md-3">
+                                        <img width="100px" height="100px" class="ing" *ngIf="isImageSaved" [src]="cardImageBase64" />
+                                      </div>
+                                      <div class="col-md-3">
+                                        <a class="btn btn-danger" style="color: white;" (click)="removeImage()" *ngIf="isImageSaved">X</a>                              
+                                      </div>                  
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8"></div>
+                                        <div class="col-md-4">
+                                            <button type="submit" class="btn btn-success form-control" [disabled]="!heroForm.form.valid">Submit</button>
+                                        </div>
+                                    </div>
+                               </form>
+                        </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-md-9"></div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-danger" (click)="onCloseHandled()" >Close</button>
+                            </div>
+                        </div>
+                        </div>
+           </div>
+            </div>
+   </div>
+       <!--Modal MakeOrder ///////////////////////////////////////////////////////////////////-->
+       <div class="modal " tabindex="-1" role="dialog"  [ngStyle]="{'display':display2}">
+        <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                    <div class="modal-header" style="background-color: black; color: white;">
+                        <h2 class="modal-title lead" style="font-family: cursive; color: gray;">make an Order</h2>
+                        <a style="cursor: pointer;" class="close" aria-label="Close" (click)="onCloseHandled2()"><span aria-hidden="true">&times;</span></a>
+                        </div>
+               <div class="modal-body">
+                <form (ngSubmit)="onOrder()" #heroFormo="ngForm">
+                    <div class="form-group row">
+                        <div class="col-md-"></div>
+                        <div class="col-md-4">
+                            <label for="Number" class="col-form-label">Number</label>
+                            <input type="text" class="form-control" id="Number"
+                            [(ngModel)]="order.Number" name="Number">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="ArrivalWeek" class="col-form-label">ArrivalWeek</label>
+                            <input type="text" class="form-control" id="ArrivalWeek"
+                            [(ngModel)]="order.ArrivalWeek" name="ArrivalWeek">       
+                        </div>
+                        <div class="col-md-4">
+                            <label for="Quantity" class="col-form-label">Client</label>
+                            <input type="text" class="form-control" id="Client"
+                            [(ngModel)]="order.Client" name="Client">
+                        </div>
+                      </div>
+                        <div class="row">
+                            <div class="col-md-8"></div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-success form-control" [disabled]="!heroFormo.form.valid">Submit</button>
+                            </div>
+                        </div>
+                   </form>
+            </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-md-9"></div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-danger form-control"(click)="onCloseHandled2()" >Close</button>
+                            </div>
+                        </div>
+                        </div>
+           </div>
+            </div>
+   </div>
+       <!--Modal Delete Product ///////////////////////////////////////////////////////////////////-->
+       <div class="modal " tabindex="-1" role="dialog"  [ngStyle]="{'display':display3}">
+        <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                    <div class="modal-header" style="background-color: black;color: white;">
+                        <h2 class="modal-title lead" style="font-family: cursive; color: gray;">Delete Product</h2>
+                        <a style="cursor: pointer;" class="close" aria-label="Close" (click)="onCloseHandled3()"><span aria-hidden="true">&times;</span></a>
+                        </div>
+               <div class="modal-body">
+                          <h1 class="text-center">are you sure!</h1>
+                        </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                              <div class="col-md-6">
+                                <button type="button" class="btn btn-danger form-control" (click)="delete()" >Delete</button>
+                              </div>
+                              <div class="col-md-6">
+                                <button type="button" class="btn btn-secondary form-control" (click)="onCloseHandled3()" >Cancel</button>
+                              </div>
+                          </div>
+                        </div>
+           </div>
+            </div>
+   </div>
+                                 <!--Update product -->
+                                 <div class="modal " tabindex="-1" role="dialog"  [ngStyle]="{'display':display4}">
+                                    <div class="modal-dialog" role="document">
+                                          <div class="modal-content">
+                                                <div class="modal-header" style="background-color: black; color: white;">
+                                                      <h2 class="modal-title lead" style="font-family: cursive; color: gray;">Update Product</h2>
+                                                      <a style="cursor: pointer;" class="close" aria-label="Close" (click)="onCloseHandled4()"><span aria-hidden="true">&times;</span></a>
+                                                    </div>
+                                           <div class="modal-body" style="height: 380px;;overflow-y: scroll;">
+                                                           <!--Login Form-->
+                                                           <form (ngSubmit)="onSubmitU()" #heroFormu="ngForm">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12">
+                                                                    <label for="product" class="col-form-label">Product</label>
+                                                                    <select class="form-control" id="product "
+                                                                    required
+                                                                    [(ngModel)]="model.product " name="product ">
+                                                                    <option  [ngValue]="undefined" selected>---Select Product---</option>
+                                                                    <option *ngFor="let p of product" [value]="p.productName">{{p.productName}}</option>
+                                                                   </select>           
+                                                                </div>
+                                                            </div>  
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12">
+                                                                    <label for="package" class="col-form-label">Package</label>
+                                                                    <select class="form-control"  id="package  "
+                                                                    required
+                                                                    [(ngModel)]="model.package" name="package  ">
+                                                                    <option  [ngValue]="undefined" selected>---Select Package---</option>
+                                                                    <option *ngFor="let p of Package" [value]="p.packageName">{{p.packageName}}</option>
+                                                                   </select>           
+                                                                </div>
+                                                            </div>  
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12">
+                                                                    <label for="brand" class="col-form-label">Brand </label>
+                                                                    <select class="form-control"  id="brand"
+                                                                    required
+                                                                    [(ngModel)]="model.brand" name="brand">
+                                                                    <option  [ngValue]="undefined" selected>---Select Brand---</option>
+                                                                    <option *ngFor="let b of Brand" [value]="b.brandName">{{b.brandName}}</option>
+                                                                   </select>           
+                                                                </div>
+                                                            </div>   
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12">
+                                                                    <label for="vairte" class="col-form-label">Vairte</label>
+                                                                    <select class="form-control"  id="vairte"
+                                                                    required
+                                                                    [(ngModel)]="model.vairte" name="vairte">
+                                                                    <option  [ngValue]="undefined" selected>---Select Vairte---</option>
+                                                                    <option *ngFor="let v of Vairte" [value]="v.vairteName">{{v.vairteName}}</option>
+                                                                   </select>           
+                                                                </div>
+                                                            </div>  
+                                                            <div class="form-group row">
+                                                                <div class="col-md-12">
+                                                                    <label for="harvestId " class="col-form-label">Harvest</label>
+                                                                    <select class="form-control"  id="harvestId"
+                                                                    required
+                                                                    [(ngModel)]="model.harvestId" name="harvestId">
+                                                                    <option  [ngValue]="undefined" selected>---Select Harvest---</option>
+                                                                    <option *ngFor="let h of Harvest"[value]="h.harvestId">{{h.product}}</option>
+                                                                   </select>           
+                                                                </div>
+                                                            </div>                                                                                                                                                                                                                                                                                
+                                                            <div class="form-group row">
+                                                                <div class="col-md-"></div>
+                                                                <div class="col-md-4">
+                                                                    <label for="class" class="col-form-label">Class</label>
+                                                                    <input type="text" class="form-control" id="class"
+                                                                    required
+                                                                    [(ngModel)]="model.class" name="class ">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label for="size" class="col-form-label">Size</label>
+                                                                    <input type="text" class="form-control" id="size"
+                                                                    required
+                                                                    [(ngModel)]="model.size" name="size">       
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label for="quantity" class="col-form-label">Quantity</label>
+                                                                    <input type="text" class="form-control" id="quantity"
+                                                                    required
+                                                                    [(ngModel)]="model.quantity" name="quantity">
+                                                                </div>
+                                                              </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-8"></div>
+                                                                    <div class="col-md-4">
+                                                                        <button type="submit" class="btn btn-success form-control" [disabled]="!heroFormu.form.valid">Submit</button>
+                                                                    </div>
+                                                                </div>
+                                                           </form>
+                                                    </div>
+                                                <div class="modal-footer">
+                                                    <div class="row">
+                                                        <div class="col-md-9"></div>
+                                                        <div class="col-md-3">
+                                                            <button type="button" class="btn btn-danger" (click)="onCloseHandled4()" >Close</button>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                       </div>
+                                        </div>
+                               </div>
+                            
+
+   

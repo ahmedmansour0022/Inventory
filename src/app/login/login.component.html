@@ -1,0 +1,47 @@
+<nav class="navbar navbar-expand-lg  bg-light">
+  <a class="navbar-brand" routerLink="/Report">
+    <i class="fa fa-home" style="color: yellow; font-size:40px;"></i>
+    Inventory<span class="mange">Mangement</span></a>
+</nav>
+
+<div style="margin-bottom: 8%;">
+
+</div>
+<div class="row" style="margin: auto; margin-top: 30px;">
+  <div class="col-md-4"></div>
+<div class="col-md-4">
+  <h3 class="text-danger text-center"style="font-family: cursive;">{{error}}</h3>
+  <form (ngSubmit)="onOrder()" class="box" #heroFormo="ngForm">
+    <h1  style="font-family:'Times New Roman', Times, serif;margin-left: 49%;">Login</h1>
+    <hr>
+    <br>
+    <div class="form-group row">
+      <div class="col-md-1"></div>
+            <label for="Name" class="col-md-2 col-form-label">Name</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" id="Name"
+              [(ngModel)]="user.Name"
+              required
+               name="Name">  
+            </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-md-1"></div>
+                <label for="Password" class="col-md-2 col-form-label">Password</label>
+                <div class="col-md-8">
+                  <input type="password" class="form-control"
+                  required
+                   id="Password"
+                  [(ngModel)]="user.Password" name="Password">  
+                </div>
+            </div>    
+        <div class="row">
+            <div class="col-md-5"></div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-info form-control" [disabled]="!heroFormo.form.valid">Login</button>
+            </div>
+        </div>
+   </form>
+</div>
+<div class="col-md-4"></div>
+</div>

@@ -1,0 +1,144 @@
+<nav class="navbar navbar-expand-lg  bg-light">
+    <a class="navbar-brand" routerLink="/Report">
+      <i class="fa fa-home" style="color: yellow; font-size:40px;"></i>
+      Inventory<span class="mange">Mangement</span></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" style="color: gray;"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a routerLink="/Report" routerLinkActive="active"  class="nav-link" href="#">
+            <i class="fa fa-paste"></i>
+            Inventory Report <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/Inventory" routerLinkActive="active" class="nav-link" href="#" ><i class="fa fa-cubes" style="margin-right: 10px;"></i>Inventory</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/Sales">
+            <i class="fa fa-shopping-cart"  style="margin-right: 10px;"></i>Sales</a>
+        </li>
+      </ul>
+        <button class="btn btn-danger my-2 my-sm-0" type="submit" (click)="logout()">Log out</button>
+    </div>
+  </nav>
+  <br>  
+<div class="row">
+    <div class="col-md-2">
+    </div>
+    <div class="col-md-8">
+        <div class="row">
+         <div class="col-md-4 ">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10 box av">
+                    <h2 class="lead text-center box-info ">Available</h2>
+                    <h2 class="text-center">{{head.tAvaliable}}</h2>          
+                </div>
+                <div class="col-md-1"></div>
+             </div>
+         </div>
+         <div class="col-md-4 ">
+             <div class="row">
+                 <div class="col-md-1"></div>
+                 <div class="col-md-10 box pe">
+                    <h2 class="lead text-center box-info">Pending</h2>
+                    <h2 class="text-center">{{head.tPending}}</h2>        
+                 </div>
+                 <div class="col-md-1"></div>
+             </div>
+        </div>
+        <div class="col-md-4 ">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10 box so">
+                    <h2 class="lead text-center box-info">Sold</h2>
+                    <h2 class="text-center">{{head.tSold}}</h2>        
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="col-md-2">
+    </div>
+</div>
+<br>
+<p-table id="dt" #dt [value]="products2" [scrollable]="true"scrollHeight="355px"
+ [resizableColumns]="true" 
+ styleClass="p-datatable-sm" [columns]="selectedColumns" 
+ selectionMode="multiple" 
+ sortMode="multiple" [(selection)]="selectedProducts"
+ dataKey="id" [rows]="10"[showCurrentPageReport]="true"[rowsPerPageOptions]="[10,25,50]"[loading]="loading"
+ [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+ [globalFilterFields]="['bulletId','brand','class','harvestId','package','product','quantity','size','vairte']" >
+<ng-template pTemplate="caption">
+        <div class="moatz">
+            <button type="button" pButton pRipple  (click)="exportExcel()" class="btn btn-success export"  pTooltip="XLS">Export</button>
+        </div>
+        <div class="export" style="margin-right: 5px; float:right">
+            <span class="p-input-icon-left p-ml-auto">
+                <input class="form-control" pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Search keyword" />
+            </span>
+        </div>
+        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+            selectedItemsLabel="{0} columns selected" [style]="{minWidth: '200px'}" placeholder="Choose Columns">
+        </p-multiSelect>
+    </ng-template>
+    <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+            <col style="width:300px">
+            <col *ngFor="let col of columns" style="width:300px">
+            <col style="width:300px">
+        </colgroup>
+    </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="bulletId" pResizableColumn>bulletId <p-sortIcon field="bulletId"></p-sortIcon></th>
+                <th pResizableColumn *ngFor="let col of columns" [pSortableColumn]=col.field>
+                    {{col.header}}
+                    <p-sortIcon [field]=col.field></p-sortIcon>
+                </th>    
+                <th pSortableColumn="solid" pResizableColumn>status <p-sortIcon field="solid"></p-sortIcon></th>
+            </tr>
+            <tr>
+                <th>
+                    <p-columnFilter type="text" field="bulletId"></p-columnFilter>
+                </th>
+                <th  *ngFor="let col of columns">
+                    <p-columnFilter type="text" [field]="col.field"></p-columnFilter>
+                </th> 
+                <th>
+                    <p-columnFilter field="solid" matchMode="equals" [showMenu]="false">
+                        <ng-template  pTemplate="filter" let-value let-filter="filterCallback">
+                            <p-dropdown   [ngModel]="value" [options]="statuses" (onChange)="filter($event.value)"
+                             placeholder="Any"
+                             [style]="{'width':'100%','overflow':'visible'}" appendTo="body" [showClear]="true">
+                             <ng-template let-option pTemplate="item">
+                                <i *ngIf="option.value=='0'" class="fa fa-check-circle" style="color: green;">
+                                <span style="margin-left: 5px;">Avaliable</span> </i>
+                                <i *ngIf="option.value=='1'" class="fa fa-recycle" style="color: rgb(224, 134, 15);">
+                                    <span style="margin-left: 5px;">Pending</span></i>
+                                <i *ngIf="option.value=='2'" class="fa fa-times-circle" style="color:rgb(196, 20, 20) ;">
+                                    <span style="margin-left: 5px;">Sold</span></i>
+                             </ng-template>
+                            </p-dropdown>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product let-columns="columns">
+            <tr>
+                <td>{{product.bulletId}}</td>
+                <td *ngFor="let col of columns">
+                    {{product[col.field]}}
+                </td>
+                <td *ngIf="product.solid=='0'"><i class="fa fa-check-circle" style="color: green;"></i></td>
+                <td *ngIf="product.solid=='1'"><i class="fa fa-recycle" style="color: rgb(224, 134, 15);"></i></td>
+                <td *ngIf="product.solid=='2'"><i class="fa fa-times-circle" style="color:rgb(196, 20, 20) ;"></i></td>
+                </tr>
+        </ng-template>
+    </p-table>

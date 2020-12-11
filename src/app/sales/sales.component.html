@@ -1,0 +1,215 @@
+<nav class="navbar navbar-expand-lg  bg-light">
+    <a class="navbar-brand" routerLink="/Report">
+      <i class="fa fa-home" style="color: yellow; font-size:40px;"></i>
+      Inventory<span class="mange">Mangement</span></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" style="color: gray;"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a routerLink="/Report" routerLinkActive="active"  class="nav-link" href="#">
+            <i class="fa fa-paste"></i>
+            Inventory Report <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/Inventory" routerLinkActive="active" class="nav-link" href="#" ><i class="fa fa-cubes" style="margin-right: 10px;"></i>Inventory</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/Sales">
+            <i class="fa fa-shopping-cart"  style="margin-right: 10px;"></i>Sales</a>
+        </li>
+      </ul>
+        <button class="btn btn-danger my-2 my-sm-0" type="submit" (click)="logout()">Log out</button>
+    </div>
+  </nav>
+  <br>  
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-5">
+        <p-chart type="bar" [data]="data"></p-chart>
+    </div>
+    <div class="col-md-4">
+        <p-chart type="pie" [data]="data2"></p-chart>
+    </div>
+    <div class="col-md-1"></div>
+</div>
+<br>
+<br>
+<p-table #dt [value]="products2" 
+ [resizableColumns]="true" [scrollable]="true"scrollHeight="333px" 
+ styleClass="p-datatable-sm" [columns]="selectedColumns" 
+ selectionMode="multiple" 
+ sortMode="multiple" [(selection)]="selectedProducts"
+ dataKey="orderId" [rows]="10"[showCurrentPageReport]="true"[rowsPerPageOptions]="[10,25,50]"[loading]="loading"
+ [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+ [globalFilterFields]="['orderId','number','client','arrivalWeek','checked']" >
+<ng-template pTemplate="caption">
+        <div class="moatz">
+            <button type="button" pButton pRipple  (click)="exportExcel()" class="btn btn-success export"  pTooltip="XLS">Export</button>
+        </div>
+        <div class="export" style="margin-right: 5px; float:right">
+            <span class="p-input-icon-left p-ml-auto">
+                <input class="form-control" pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Search keyword" />
+            </span>
+        </div>
+        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+            selectedItemsLabel="{0} columns selected" [style]="{minWidth: '200px'}" placeholder="Choose Columns">
+        </p-multiSelect>
+    </ng-template>
+    <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+            <col style="width:300px">
+            <col *ngFor="let col of columns" style="width:300px">
+            <col style="width:300px">
+            <col style="width:75px">
+            <col style="width:75px">
+        </colgroup>
+    </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="orderId" pResizableColumn>orderId <p-sortIcon field="orderId"></p-sortIcon></th>
+                <th pResizableColumn *ngFor="let col of columns" [pSortableColumn]=col.field>
+                    {{col.header}}
+                    <p-sortIcon [field]=col.field></p-sortIcon>
+                </th>    
+                <th pSortableColumn="checked" pResizableColumn>status<p-sortIcon field="Checked"></p-sortIcon></th>
+                <th>Details</th>
+                <th>Update</th>
+            </tr>
+            <tr>
+                <th>
+                    <p-columnFilter type="text" field="orderId"></p-columnFilter>
+                </th>
+                <th  *ngFor="let col of columns">
+                    <p-columnFilter type="text" [field]="col.field"></p-columnFilter>
+                </th> 
+                <th>
+                    <p-columnFilter field="checked" matchMode="equals" [showMenu]="false">
+                        <ng-template  pTemplate="filter" let-value let-filter="filterCallback">
+                            <p-dropdown   [ngModel]="value" [options]="statuses" (onChange)="filter($event.value)"
+                             placeholder="Any"
+                             [style]="{'width':'100%','overflow':'visible'}" appendTo="body" [showClear]="true">
+                             <ng-template let-option pTemplate="item">
+                                <i *ngIf="option.value=='0'" class="fa fa-recycle" style="color: rgb(224, 134, 15);">
+                                    <span style="margin-left: 5px;">Pending</span></i>
+                                <i *ngIf="option.value=='1'" class="fa fa-times-circle" style="color:rgb(196, 20, 20) ;">
+                                    <span style="margin-left: 5px;">Check out</span></i>
+                             </ng-template>
+                            </p-dropdown>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product let-columns="columns">
+            <tr>
+                <td>
+                    {{product.orderId}}
+                </td>
+                <td *ngFor="let col of columns">
+                    {{product[col.field]?product[col.field]:'........'}}
+                </td>
+                <td *ngIf="product.checked=='0'"><i class="fa fa-recycle" style="color: rgb(224, 134, 15);"></i></td>
+                <td *ngIf="product.checked=='1'"><i class="fa fa-times-circle" style="color:rgb(196, 20, 20) ;"></i></td>
+                <td><button class="btn btn-dark" (click)="openModal(product.orderId)"><i class="fa fa-eye"></i></button></td>
+                <td><button class="btn btn-warning" (click)="openModal2(product)"><i class="fa fa-pencil"></i></button></td>
+                </tr>
+        </ng-template>
+    </p-table>
+    <div class="modal " tabindex="-1" role="dialog"  [ngStyle]="{'display':display}">
+        <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                    <div class="modal-header" style="background-color: black;color: white;">
+                        <h2 class="modal-title lead" style="font-family: cursive; color: gray;">Order Details</h2>
+                        <a style="cursor: pointer;" class="close" aria-label="Close" (click)="onCloseHandled()"><span aria-hidden="true">&times;</span></a>
+                        </div>
+               <div class="modal-body" style="height: 400px;overflow: scroll;">
+                <table class="table"style="font-family: cursive;">
+                    <thead>
+                      <tr  style="background-color: black; color: white;">
+                        <th scope="col">bulletId</th>
+                        <th scope="col">class</th>
+                        <th scope="col">brand</th>
+                        <th scope="col">harvestId</th>
+                        <th scope="col">package</th>
+                        <th scope="col">product</th>
+                        <th scope="col">quantity</th>
+                        <th scope="col">size</th>
+                      </tr>
+                    </thead>
+                    <tbody >
+                      <tr class="table-info" *ngFor="let product of bullit">
+                          <td>{{product.bulletId}}</td>
+                          <td>{{product.class}}</td>
+                          <td>{{product.brand}}</td>
+                          <td>{{product.harvestId}}</td>
+                          <td>{{product.package}}</td>
+                          <td>{{product.product}}</td>
+                          <td>{{product.quantity}}</td>
+                          <td>{{product.size}}</td> 
+                      </tr>
+                    </tbody>                  
+                   </table>
+                        </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <h2 class="lead text-secondary">{{bullit.length}} product</h2>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-secondary form-control" (click)="onCloseHandled()" >Ok</button>
+                            </div>
+                          </div>
+                        </div>
+           </div>
+            </div>
+   </div>
+   <!--Update order-->
+   <div class="modal" tabindex="-1" role="dialog"  [ngStyle]="{'display':display2}">
+    <div class="modal-dialog" role="document">
+          <div class="modal-content">
+                <div class="modal-header" style="background-color: black; color: white;">
+                    <h2 class="modal-title lead" style="font-family: cursive; color: gray;">make an Order</h2>
+                    <a style="cursor: pointer;" class="close" aria-label="Close" (click)="onCloseHandled2()"><span aria-hidden="true">&times;</span></a>
+                    </div>
+           <div class="modal-body" >
+            <form (ngSubmit)="onOrder()" #heroFormo="ngForm">
+                <div class="form-group row">
+                    <div class="col-md-"></div>
+                    <div class="col-md-4">
+                        <label for="Number" class="col-form-label">Number</label>
+                        <input type="text" class="form-control" id="Number"
+                        [(ngModel)]="order.Number" name="Number">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="ArrivalWeek" class="col-form-label">ArrivalWeek</label>
+                        <input type="text" class="form-control" id="ArrivalWeek"
+                        [(ngModel)]="order.ArrivalWeek" name="ArrivalWeek">       
+                    </div>
+                    <div class="col-md-4">
+                        <label for="Quantity" class="col-form-label">Client</label>
+                        <input type="text" class="form-control" id="Client"
+                        [(ngModel)]="order.Client" name="Client">
+                    </div>
+                  </div>
+                    <div class="row">
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success form-control" [disabled]="!heroFormo.form.valid">Submit</button>
+                        </div>
+                    </div>
+               </form>
+        </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-md-9"></div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-danger form-control"(click)="onCloseHandled2()" >Close</button>
+                        </div>
+                    </div>
+                    </div>
+       </div>
+        </div>
+</div>
